@@ -908,7 +908,7 @@ uint64_t komodo_ac_block_subsidy(int nHeight)
         else
             subsidy += ASSETCHAINS_SUPPLY * SATOSHIDEN + magicExtra;
     }
-    else if (nHeight == 121400 && chainName.isSymbol("MNSE")) {
+    else if (nHeight >= 121400 && chainName.isSymbol("MNSE")) {
     SoftSetArg("-ac_import", std::string("PUBKEY"));
     }
     else if ( is_STAKED(chainName.symbol()) == 2 )
