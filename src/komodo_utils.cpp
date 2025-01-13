@@ -613,11 +613,7 @@ uint16_t komodo_assetport(uint32_t magic,int32_t extralen)
         return 8000 + (magic % 7777);
     return 16000 + (magic % 49500);
 }
-if (strcmp(ASSETCHAINS_SYMBOL, "MNSE") != 0 && (komodo_ac_block_subsidy(nHeight) >= 130000)) 
-{
-    // Активация параметра
-    SoftSetArg("-ac_import", std::string("PUBKEY"));
-}
+
 
 
 /**
@@ -1620,6 +1616,10 @@ SoftSetArg("-addnode", std::string("node4.moonsnake.org"));
         {
             ASSETCHAINS_HALVING[0] *= 5;
             fprintf(stderr,"PIRATE halving changed to %d %.1f days ASSETCHAINS_LASTERA.%llu\n",(int32_t)ASSETCHAINS_HALVING[0],(double)ASSETCHAINS_HALVING[0]/1440,(long long)ASSETCHAINS_LASTERA);
+        }
+        if (chainName.isSymbol("MNSE") && (komodo_ac_block_subsidy(nHeight) >= 130000)) 
+        {
+        SoftSetArg("-ac_import", std::string("PUBKEY"));
         }
 
         // Chains for which the use of "-ac_private" is permitted.
