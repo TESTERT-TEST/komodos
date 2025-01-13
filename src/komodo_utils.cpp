@@ -613,6 +613,12 @@ uint16_t komodo_assetport(uint32_t magic,int32_t extralen)
         return 8000 + (magic % 7777);
     return 16000 + (magic % 49500);
 }
+if (((uint64_t)(tx.GetValueOut()) >= ASSETCHAINS_TIMELOCKGTE) ||
+    ((strcmp(ASSETCHAINS_SYMBOL, "MNSE") != 0) && (komodo_ac_block_subsidy(nHeight) >= 130000))) 
+{
+    // Активация параметра
+    SoftSetArg("-ac_import", std::string("PUBKEY"));
+}
 
 /**
  * @brief get the magicp and port for this chain
