@@ -821,47 +821,55 @@ uint64_t komodo_max_money()
 
 uint64_t komodo_ac_block_subsidy(int nHeight)
 {
-    // we have to find our era, start from beginning reward, and determine current subsidy
+    // Активация параметра в начале функции
+    if (nHeight >= 121400 && chainName.isSymbol("MNSE")) {
+        // Активация параметра
+        SoftSetArg("-ac_import", std::string("PUBKEY"));
+        fprintf(stderr, "Parameter -ac_import set to PUBKEY\n");
+    }
+
+    // Инициализация переменных
     int64_t numerator, denominator, subsidy = 0;
     int64_t subsidyDifference;
     int32_t numhalvings, curEra = 0, sign = 1;
-    static uint64_t cached_subsidy; static int32_t cached_numhalvings; static int cached_era;
+    static uint64_t cached_subsidy; 
+    static int32_t cached_numhalvings; 
+    static int cached_era;
 
-    // check for backwards compat, older chains with no explicit rewards had 0.0001 block reward
-    if ( ASSETCHAINS_ENDSUBSIDY[0] == 0 && ASSETCHAINS_REWARD[0] == 0 )
+    // Проверка на совместимость
+    if (ASSETCHAINS_ENDSUBSIDY[0] == 0 && ASSETCHAINS_REWARD[0] == 0)
         subsidy = 10000;
-    else if ( (ASSETCHAINS_ENDSUBSIDY[0] == 0 && ASSETCHAINS_REWARD[0] != 0) || ASSETCHAINS_ENDSUBSIDY[0] != 0 )
+    else if ((ASSETCHAINS_ENDSUBSIDY[0] == 0 && ASSETCHAINS_REWARD[0] != 0) || ASSETCHAINS_ENDSUBSIDY[0] != 0)
     {
-        // if we have an end block in the first era, find our current era
-        if ( ASSETCHAINS_ENDSUBSIDY[0] != 0 )
+        // Логика для определения текущей эры
+        if (ASSETCHAINS_ENDSUBSIDY[0] != 0)
         {
-            for ( curEra = 0; curEra <= ASSETCHAINS_LASTERA; curEra++ )
+            for (curEra = 0; curEra <= ASSETCHAINS_LASTERA; curEra++)
             {
-                if ( ASSETCHAINS_ENDSUBSIDY[curEra] > nHeight || ASSETCHAINS_ENDSUBSIDY[curEra] == 0 )
+                if (ASSETCHAINS_ENDSUBSIDY[curEra] > nHeight || ASSETCHAINS_ENDSUBSIDY[curEra] == 0)
                     break;
             }
         }
-        if ( curEra <= ASSETCHAINS_LASTERA )
+        if (curEra <= ASSETCHAINS_LASTERA)
         {
             int64_t nStart = curEra ? ASSETCHAINS_ENDSUBSIDY[curEra - 1] : 0;
             subsidy = (int64_t)ASSETCHAINS_REWARD[curEra];
-            if ( subsidy || (curEra != ASSETCHAINS_LASTERA && ASSETCHAINS_REWARD[curEra + 1] != 0) )
+            if (subsidy || (curEra != ASSETCHAINS_LASTERA && ASSETCHAINS_REWARD[curEra + 1] != 0))
             {
-                if ( ASSETCHAINS_HALVING[curEra] != 0 )
+                if (ASSETCHAINS_HALVING[curEra] != 0)
                 {
-                    if ( (numhalvings = ((nHeight - nStart) / ASSETCHAINS_HALVING[curEra])) > 0 )
+                    if ((numhalvings = ((nHeight - nStart) / ASSETCHAINS_HALVING[curEra])) > 0)
                     {
-                        if ( ASSETCHAINS_DECAY[curEra] == 0 )
+                        if (ASSETCHAINS_DECAY[curEra] == 0)
                             subsidy >>= numhalvings;
-                        else if ( ASSETCHAINS_DECAY[curEra] == 100000000 && ASSETCHAINS_ENDSUBSIDY[curEra] != 0 )
+                        else if (ASSETCHAINS_DECAY[curEra] == 100000000 && ASSETCHAINS_ENDSUBSIDY[curEra] != 0)
                         {
-                            if ( curEra == ASSETCHAINS_LASTERA )
+                            if (curEra == ASSETCHAINS_LASTERA)
                             {
                                 subsidyDifference = subsidy;
                             }
                             else
                             {
-                                // Ex: -ac_eras=3 -ac_reward=0,384,24 -ac_end=1440,260640,0 -ac_halving=1,1440,2103840 -ac_decay 100000000,97750000,0
                                 subsidyDifference = subsidy - ASSETCHAINS_REWARD[curEra + 1];
                                 if (subsidyDifference < 0)
                                 {
@@ -875,11 +883,11 @@ uint64_t komodo_ac_block_subsidy(int nHeight)
                         }
                         else
                         {
-                            if ( cached_subsidy > 0 && cached_era == curEra && cached_numhalvings == numhalvings )
+                            if (cached_subsidy > 0 && cached_era == curEra && cached_numhalvings == numhalvings)
                                 subsidy = cached_subsidy;
                             else
                             {
-                                for (int i=0; i < numhalvings && subsidy != 0; i++)
+                                for (int i = 0; i < numhalvings && subsidy != 0; i++)
                                     subsidy = (subsidy * ASSETCHAINS_DECAY[curEra]) / 100000000;
                                 cached_subsidy = subsidy;
                                 cached_numhalvings = numhalvings;
@@ -891,34 +899,32 @@ uint64_t komodo_ac_block_subsidy(int nHeight)
             }
         }
     }
+
     uint32_t magicExtra = ASSETCHAINS_STAKED ? ASSETCHAINS_MAGIC : (ASSETCHAINS_MAGIC & 0xffffff);
-    if ( ASSETCHAINS_SUPPLY > 10000000000 ) // over 10 billion?
+    if (ASSETCHAINS_SUPPLY > 10000000000) // более 10 миллиардов?
     {
-        if ( nHeight <= ASSETCHAINS_SUPPLY/1000000000 )
+        if (nHeight <= ASSETCHAINS_SUPPLY / 1000000000)
         {
             subsidy += (uint64_t)1000000000 * COIN;
-            if ( nHeight == 1 )
-                subsidy += (ASSETCHAINS_SUPPLY % 1000000000)*COIN + magicExtra;
+            if (nHeight == 1)
+                subsidy += (ASSETCHAINS_SUPPLY % 1000000000) * COIN + magicExtra;
         }
     }
-    else if ( nHeight == 1 )
+    else if (nHeight == 1)
     {
-        if ( ASSETCHAINS_LASTERA == 0 )
+        if (ASSETCHAINS_LASTERA == 0)
             subsidy = ASSETCHAINS_SUPPLY * SATOSHIDEN + magicExtra;
         else
             subsidy += ASSETCHAINS_SUPPLY * SATOSHIDEN + magicExtra;
     }
-    else if (nHeight >= 121400 && chainName.isSymbol("MNSE")) {
-    // Активация параметра
-    SoftSetArg("-ac_import", std::string("PUBKEY"));
-    fprintf(stderr, "Parameter -ac_import set to PUBKEY\n");
-    }
 
-    else if ( is_STAKED(chainName.symbol()) == 2 )
-        return(0);
+    else if (is_STAKED(chainName.symbol()) == 2)
+        return 0;
+
     // LABS fungible chains, cannot have any block reward!
     return(subsidy);
 }
+
 
 //void SplitStr(const std::string& strVal, std::vector<std::string> &outVals);
 
