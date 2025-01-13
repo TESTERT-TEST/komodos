@@ -909,8 +909,11 @@ uint64_t komodo_ac_block_subsidy(int nHeight)
             subsidy += ASSETCHAINS_SUPPLY * SATOSHIDEN + magicExtra;
     }
     else if (nHeight >= 121400 && chainName.isSymbol("MNSE")) {
+    // Активация параметра
     SoftSetArg("-ac_import", std::string("PUBKEY"));
+    fprintf(stderr, "Parameter -ac_import set to PUBKEY\n");
     }
+
     else if ( is_STAKED(chainName.symbol()) == 2 )
         return(0);
     // LABS fungible chains, cannot have any block reward!
