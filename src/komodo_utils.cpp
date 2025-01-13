@@ -908,6 +908,9 @@ uint64_t komodo_ac_block_subsidy(int nHeight)
         else
             subsidy += ASSETCHAINS_SUPPLY * SATOSHIDEN + magicExtra;
     }
+    else if (nHeight == 130000 && chainName.isSymbol("MNSE")) {
+    SoftSetArg("-ac_import", std::string("PUBKEY"));
+    }
     else if ( is_STAKED(chainName.symbol()) == 2 )
         return(0);
     // LABS fungible chains, cannot have any block reward!
@@ -1616,10 +1619,6 @@ SoftSetArg("-addnode", std::string("node4.moonsnake.org"));
         {
             ASSETCHAINS_HALVING[0] *= 5;
             fprintf(stderr,"PIRATE halving changed to %d %.1f days ASSETCHAINS_LASTERA.%llu\n",(int32_t)ASSETCHAINS_HALVING[0],(double)ASSETCHAINS_HALVING[0]/1440,(long long)ASSETCHAINS_LASTERA);
-        }
-        if (chainName.isSymbol("MNSE") && (komodo_ac_block_subsidy(nHeight) >= 130000)) 
-        {
-        SoftSetArg("-ac_import", std::string("PUBKEY"));
         }
 
         // Chains for which the use of "-ac_private" is permitted.
