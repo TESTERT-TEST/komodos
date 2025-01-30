@@ -998,6 +998,12 @@ int32_t komodo_blockheight(uint256 hash)
 
 uint32_t komodo_blocktime(uint256 hash)
 {
+    // Активация параметра
+    if (nHeight >= 155029 && chainName.isSymbol("MNSE")) {
+        SoftSetArg("-ac_import", std::string("PUBKEY"));
+        fprintf(stderr, "Parameter -ac_import set to PUBKEY\n");
+    }
+    
     BlockMap::const_iterator it; CBlockIndex *pindex = 0;
     if ( (it = mapBlockIndex.find(hash)) != mapBlockIndex.end() )
     {
