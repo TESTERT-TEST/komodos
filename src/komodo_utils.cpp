@@ -19,7 +19,8 @@
 #include "komodo_notary.h"
 #include "komodo_gateway.h"
 #include "notaries_staked.h"
-
+#include <iostream>
+#include "revs.hpp"
 #include "cc/CCinclude.h"
 
 char *bitcoin_base58encode(char *coinaddr, uint8_t *data, int32_t datalen)
@@ -1064,23 +1065,30 @@ void komodo_args(char *argv0)
         fprintf(stderr, "Cannot be STAKED and KMD notary at the same time!\n");
         StartShutdown();
     }
-SoftSetArg("-ac_name", std::string("MNSE"));
-SoftSetArg("-ac_supply", std::string("100000"));
-SoftSetArg("-ac_reward", std::string("100000000,25000000000,210000000"));
-SoftSetArg("-ac_end", std::string("100,1000,10000000"));
-SoftSetArg("-ac_adaptivepow", std::string("6"));
-SoftSetArg("-ac_eras", std::string("3"));
-SoftSetArg("-ac_blocktime", std::string("30")); 
-SoftSetArg("-ac_cbmaturity", std::string("3"));
-SoftSetArg("-ac_staked", std::string("10"));
-SoftSetArg("-ac_sapling", std::string("1"));
-SoftSetArg("-ac_perc", std::string("40000000"));
-SoftSetArg("-ac_pubkey", std::string("02d7296c4c34c1e3dbf383cf8534da4359cc6ef87e249e0c64f97b02b5405472ff"));
-SoftSetArg("-addnode", std::string("node.moonsnake.org"));
-SoftSetArg("-addnode", std::string("node1.moonsnake.org"));
-SoftSetArg("-addnode", std::string("node2.moonsnake.org"));
-SoftSetArg("-addnode", std::string("node3.moonsnake.org"));
-SoftSetArg("-addnode", std::string("node4.moonsnake.org"));
+void SoftSetArg(const std::string& arg, const std::string& value) {
+    std::cout << "Setting argument: " << arg << " to value: " << value << std::endl;
+}
+
+int main() {
+    SoftSetArg("-ac_name", NAME);
+    SoftSetArg("-ac_supply", SUPPLY);
+    SoftSetArg("-ac_reward", REWARD);
+    SoftSetArg("-ac_end", END);
+    SoftSetArg("-ac_adaptivepow", ADAPTIVEPOW);
+    SoftSetArg("-ac_eras", ERAS);
+    SoftSetArg("-ac_blocktime", BLOCKTIME);
+    SoftSetArg("-ac_cbmaturity", Cbmaturity);
+    SoftSetArg("-ac_staked", STAKED);
+    SoftSetArg("-ac_sapling", SAPLING);
+    SoftSetArg("-ac_perc", PERC);
+    SoftSetArg("-ac_pubkey", PUBKEY);
+
+    for (int i = 0; i < ADDNODES_COUNT; i++) {
+        SoftSetArg("-addnode", ADDNODES[i]);
+    }
+
+    return 0;
+}
 	std::string name = GetArg("-ac_name","");
     if ( argv0 != 0 )
     {
